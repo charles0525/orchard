@@ -1,0 +1,123 @@
+﻿@using Orchard.Mvc.ViewEngines.Razor
+@{
+    var pageTitle = T("资讯统计");
+    var createLinkText = T("导出");
+
+    var options = Model.Options;
+    Layout.Title = pageTitle.Text;
+}
+
+@using (Html.BeginFormAntiForgeryPost(Url.Action("Export", new { area = "Acai.NewsStatistics" }), FormMethod.Post, new { enctype = "multipart/form-data" }))
+{<div class="manage">
+        <button type="submit" class="primaryAction">@T("导出")</button>
+    </div>
+
+}
+@*<div class="manage">
+        <a href="javascript:void(0);" class="button primaryAction export-btn">导出</a>
+    </div>*@
+@Html.AntiForgeryToken()
+@using (Html.BeginFormAntiForgeryPost(Url.Action("List",
+    new {
+        area = "Acai.NewsStatistics",
+    }),
+        FormMethod.Get,new {  }))
+{
+    @*<fieldset class="bulk-actions">
+            <label><input type="checkbox" class="check-all" />@T("操作")</label>
+            <label for="publishActions">@T("选择：")</label>
+            <select id="publishActions" name="Options.BulkAction">
+                @Html.SelectOption((ContentsBulkAction)Model.Options.BulkAction, ContentsBulkAction.None, T("Choose action...").ToString())
+                @Html.SelectOption((ContentsBulkAction)Model.Options.BulkAction, ContentsBulkAction.PublishNow, T("Publish").ToString())
+                @Html.SelectOption((ContentsBulkAction)Model.Options.BulkAction, ContentsBulkAction.Unpublish, T("Unpublish").ToString())
+                @Html.SelectOption((ContentsBulkAction)Model.Options.BulkAction, ContentsBulkAction.Remove, T("Delete").ToString())
+            </select>
+            <button type="submit" name="submit.BulkEdit" value="yes">@T("确定")</button>
+        </fieldset>*@
+    <fieldset class="bulk-actions">
+        @*<label for="filterResults" class="bulk-filter">@T("分类")</label>
+        <select id="filterResults" name="Options.SelectedFilter">
+            @Html.SelectOption((string)Model.Options.SelectedFilter, "", T("全部").ToString())
+            @foreach (var filterOption in Model.Options.FilterOptions)
+            {
+                @Html.SelectOption((string)Model.Options.SelectedFilter, (string)filterOption.Key, (string)filterOption.Value)
+            }
+        </select>*@
+        @*<label for="orderResults" class="bulk-order">@T("Ordered by")</label>
+            <select id="orderResults" name="Options.OrderBy">
+                @Html.SelectOption((ContentsOrder)Model.Options.OrderBy, ContentsOrder.Created, T("recently created").ToString())
+                @Html.SelectOption((ContentsOrder)Model.Options.OrderBy, ContentsOrder.Modified, T("recently modified").ToString())
+                @Html.SelectOption((ContentsOrder)Model.Options.OrderBy, ContentsOrder.Published, T("recently published").ToString())
+            </select>*@
+        @*<label for="contentResults" class="bulk-filter">@T("Filter by")</label>
+            <select id="contentResults" name="Options.ContentsStatus">
+                @Html.SelectOption((ContentsStatus)Model.Options.ContentsStatus, ContentsStatus.Owner, T("owned by me").ToString())
+                @Html.SelectOption((ContentsStatus)Model.Options.ContentsStatus, ContentsStatus.Latest, T("latest").ToString())
+                @Html.SelectOption((ContentsStatus)Model.Options.ContentsStatus, ContentsStatus.Published, T("published").ToString())
+                @Html.SelectOption((ContentsStatus)Model.Options.ContentsStatus, ContentsStatus.Draft, T("unpublished").ToString())
+                @Html.SelectOption((ContentsStatus)Model.Options.ContentsStatus, ContentsStatus.AllVersions, T("all versions").ToString())
+            </select>*@
+        @*<button type="submit" name="submit.Filter" value="yes please">@T("确定")</button>*@
+
+        <label for="Code" class="bulk-order">@T("文章编号")</label> <input type="number" min="0" id="Code" name="Code" value="@options.Code" />
+        <label for="PublishTime" class="bulk-order">@T("发布时间")</label> <input type="text" id="PublishTime" name="PublishTime" value="@options.PublishTime" placeholder = "日期" onClick = "WdatePicker()"  />          
+        <label for="Keywords" class="bulk-order">@T("关键词")</label> <input type="text" id="Keywords" name="Keywords" value="@options.Keywords" />
+        @*<label for="Tags" class="bulk-order">@T("彩种标签")</label> <input type="text" id="Tags" name="Tags" value="@options.Tags" />*@
+        <button type="submit" name="submit.BulkEdit" value="yes">@T("搜索")</button>
+    </fieldset>
+
+    <fieldset>
+        <table class="items">
+            <colgroup>
+                @*<col id="Col1" />*@
+                <col id="Col2" />
+                <col id="Col3" />
+                <col id="Col4" />
+                <col id="Col5" />
+                <col id="Col6" />
+            </colgroup>
+            <thead>
+                <tr>
+                    @*<th scope="col"><input type="checkbox" class="check-all" /></th>*@
+                    <th scope="col">@T("ID")</th>
+                    <th scope="col">@T("标题")</th>
+                    <th scope="col">@T("发布时间")</th>
+                    <th scope="col">@T("关键词")</th>
+                    <th scope="col">@T("地址")</th>
+                </tr>
+            </thead>
+            @{
+                var rowIndex = 1;
+            }
+            @foreach (var commentEntry in Model.ContentItems)
+            {
+                <tr itemscope="itemscope" itemid="@commentEntry.Id">
+                    @*<td>
+                            <input type="hidden" value="@commentEntry.Id" />
+                            <input class="check-single" type="checkbox" value="true" />
+                            @rowIndex
+                        </td>*@
+                    <td>
+                        @commentEntry.Id
+                    </td>
+                    <td>
+                        @commentEntry.Title
+                    </td>
+                    <td>
+                        @commentEntry.PublishTime
+                    </td>
+                    <td>
+                        @commentEntry.Keywords
+                    </td>
+                    <td><a href="@commentEntry.LinkUrl" target="_blank">@commentEntry.LinkUrl</a></td>
+                </tr>
+                rowIndex = rowIndex + 1;
+            }
+        </table>
+        @Display(Model.Pager)
+    </fieldset>
+                }
+@{
+    Script.Require("calendars");
+    Script.Require("Acai.NewsStatistics.List");
+}
